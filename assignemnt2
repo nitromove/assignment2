@@ -1,0 +1,56 @@
+---
+- name: Install and configure LAMP stack
+  hosts: all
+  become: true
+  tasks:
+    - name: Update apt package cache
+      apt:
+        update_cache: yes
+
+    - name: Install Apache
+      apt:
+        name: apache2
+        state: present
+
+    - name: Ensure Apache service is running
+      service:
+        name: apache2
+        state: started
+        enabled: yes
+
+    - name: Install and configure MySQL
+      hosts: all
+      become: yes
+      role: geerlingguy.mysql
+
+    - name: Install and configure PHP
+      hosts: all
+      become: yes
+      tasks:
+        - name: Install PHP
+          apt:
+            name: php
+            state: present
+
+        - name: Restarting Apache
+          service:
+            name: apache2
+            state: restarted
+
+        - name: Create PHP test page
+          template:
+            src: phptest.php.j2
+            dest: /var/www/html/phptest.php
+
+        - name: Verify PHP functionality
+          hosts: web_servers
+          uri:
+            url: http://localhost/phpinfo.php
+            status_code: 200
+            body_format: plain
+          register: php_response
+
+    - name: Fail if PHP functionality is not working
+      fail:
+        msg: PHP functionality is not working. See {{ php_response.body }} for more information.
+      when: php_response.status != 200
