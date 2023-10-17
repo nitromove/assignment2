@@ -1,47 +1,57 @@
 Vagrant.configure("2") do |config|
+  # Configuration for the 'Master' node
   config.vm.define "Master" do |master_vm|
     master_vm.vm.box = "generic/ubuntu2204"
     master_vm.vm.network "private_network", type: "dhcp"
 
-    master_vm.vm.provision "shell", inline: <<-SHELL
-      sudo useradd altschool
-      sudo usermod -aG sudo altschool
-      echo 'altschool ALL=(ALL:ALL) ALL' | sudo EDITOR='tee -a' visudo
-    SHELL
+    # Provisioning for 'Master' node
+    master_vm.vm.provision "shell" do |shell|
+      shell.inline = <<-SHELL
+        # Create the 'altschool' user with sudo privileges
+        sudo useradd altschool
+        sudo usermod -aG sudo altschool
+        echo 'altschool ALL=(ALL:ALL) ALL' | sudo EDITOR='tee -a' visudo
 
-    
-    master_vm.vm.provision "shell", inline: "while [ ! -d /home/altschool ]; do sleep 1; done"
+        # Ensure the SSH directory exists and generate the key pair
+        if [ ! -d /home/altschool/.ssh ]; then
+          sudo -u altschool mkdir -p /home/altschool/.ssh
+        fi
+        sudo -u altschool ssh-keygen -t rsa -N '' -f /home/altschool/.ssh/id_rsa
+        cat /home/altschool/.ssh/id_rsa.pub >> /home/altschool/.ssh/authorized_keys
+        sudo chmod 700 /home/altschool/.ssh
+        sudo chmod 600 /home/altschool/.ssh/authorized_keys
+        sudo chown -R altschool:altschool /home/altschool/.ssh
+      SHELL
+    end
 
-    master_vm.vm.provision "shell", inline: <<-SHELL
-      ssh-keygen -t rsa
-      echo "127.0.0.1:2222" | sudo -u altschool tee /home/altschool/.ssh/authorized_keys
-      sudo chmod 700 /home/altschool/.ssh
-      sudo chmod 600 /home/altschool/.ssh/authorized_keys
-      sudo chown -R altschool:altschool /home/altschool/.ssh
-    SHELL
-
+    # Additional provisioning for 'Master' node
     master_vm.vm.provision "ansible" do |ansible|
       ansible.playbook = "assignment.yaml"
     end
   end
 
+  # Configuration for the 'Slave' node
   config.vm.define "Slave" do |slave_vm|
     slave_vm.vm.box = "generic/ubuntu2204"
     slave_vm.vm.network "private_network", type: "dhcp"
 
-    slave_vm.vm.provision "shell", inline: <<-SHELL
-      if ! id -u altschool &>/dev/null; then
-        sudo useradd altschool
-      fi
-      sudo -u altschool mkdir -p /home/altschool/.ssh
-      echo "127.0.0.1:2222" | sudo -u altschool tee /home/altschool/.ssh/authorized_keys
-      sudo chmod 700 /home/altschool/.ssh
-      sudo chmod 600 /home/altschool/.ssh/authorized_keys
-      sudo chown -R altschool:altschool /home/altschool/.ssh
-    SHELL
+    # Provisioning for 'Slave' node
+    slave_vm.vm.provision "shell" do |shell|
+      shell.inline = <<-SHELL
+        # Check if 'altschool' user exists and create if not
+        if ! id -u altschool &>/dev/null; then
+          sudo useradd altschool
+        fi
 
-    slave_vm.vm.provision "ansible" do |ansible|
-      ansible.playbook = "assignment.yaml"
+        # Ensure the SSH directory exists and add the public key
+        sudo -u altschool mkdir -p /home/altschool/.ssh
+        cat /home/altschool/.ssh/id_rsa.pub >> /home/altschool/.ssh/authorized_keys
+        sudo chmod 700 /home/altschool/.ssh
+        sudo chmod 600 /home/altschool/.ssh/authorized_keys
+        sudo chown -R altschool:altschool /home/altschool/.ssh
+      SHELL
     end
+
+    # Additional provisioning for 'Slave' node (if needed)
   end
 end
