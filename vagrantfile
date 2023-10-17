@@ -24,7 +24,7 @@ Vagrant.configure("2") do |config|
       SHELL
     end
 
-    # Additional provisioning for 'Master' node
+    # Provision to run ansible on master
     master_vm.vm.provision "ansible" do |ansible|
       ansible.playbook = "assignment.yaml"
     end
@@ -52,6 +52,6 @@ Vagrant.configure("2") do |config|
       SHELL
     end
 
-    # Additional provisioning for 'Slave' node (if needed)
+    
   end
 end
