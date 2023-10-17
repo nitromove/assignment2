@@ -17,8 +17,23 @@ Ansible playbook aims to automate the setup of a LAMP stack on the specified hos
 
 **Task by task breakdown of playbook**
 
-Update apt package cache:
+**Update apt package cache:**
 
 This task updates the APT package cache to ensure that the package manager has the latest package information.
-Install Apache:
+
+**Install Apache:**
+
 It installs the Apache web server (HTTPD) on the target hosts. The task ensures that Apache is present on the system.
+
+
+**Ensure Apache service is running:**
+
+This task ensures that the Apache service is running and set to start automatically on system boot. It ensures that the web server is operational.
+
+**Install and configure MySQL:**
+
+This task utilizes the Ansible role geerlingguy.mysql to install and configure MySQL on the target hosts. This role provides a comprehensive MySQL setup.
+
+**Install and verify PHP functionality**
+
+This task encompasses the installation of PHP on the target hosts and encompasses several sub-tasks. It begins by installing the PHP package on the system, followed by restarting the Apache service to ensure PHP support is properly applied. Additionally, it creates a PHP test page using a template, a common practice to assess PHP functionality. The final sub-task involves verifying PHP functionality, achieved by making an HTTP request to the PHP test page. 
