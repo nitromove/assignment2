@@ -1,7 +1,7 @@
 # Deployment of Vagrant ubuntu cluster with lamp stack.
 **Documentation**
 
-The objective of this project is to automate the deployment of two Ubuntu virtual machines, 'Master' and 'Slave,' with an integrated LAMP (Linux, Apache, MySQL, PHP) stack. The deployment is orchestrated using Vagrant. This document provides an overview of the Vagrant project structure and key provisioning details.
+The objective of this project is to automate the deployment of two Ubuntu virtual machines, 'Master' and 'Slave,' with an integrated LAMP (Linux, Apache, MySQL, PHP) stack. The deployment is orchestrated using Vagrant. This document provides an overview of the Vagrant project structure, how to run locally and key provisioning details.
 
 **Master node configuration**
 
@@ -25,7 +25,9 @@ This task updates the APT package cache to ensure that the package manager has t
 
 It installs the Apache web server (HTTPD) on the target hosts. The task ensures that Apache is present on the system.
 
+**Using this project**
 
+To use tgis project, clone the repository and then navigate to the folder where you have the repository. Use the "vagran up" command to start the virtual machine and automation begins.
 **Ensure Apache service is running:**
 
 This task ensures that the Apache service is running and set to start automatically on system boot. It ensures that the web server is operational.
